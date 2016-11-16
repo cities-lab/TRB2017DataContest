@@ -1,0 +1,38 @@
+---
+title: "Writeup"
+author: "Liming Wang"
+date: "11/15/2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "../")
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=F)
+options(scipen=100)
+options(digits=3)
+
+if (!require("pacman")) {install.packages("pacman"); library(pacman)}
+p_load(dplyr, gridExtra, ggplot2, knitr, printr, scales, magrittr, stargazer, readr, pander, stringr, ggmap, maptools)
+```
+
+```{r source, include=F}
+source("code/load_data.R")
+```
+
+## Map
+
+```{r maps}
+shpfile <- 'data/taz/OUATS_AirSage_TAZ.shp'
+sdf <- read.shpfile(shpfile)
+
+sdf.ff <- fortify(sdf, region="TAZ_ID")
+sdf.ff %<>% left_join(m0401.o, by=c("id"="TAZ_ID"))
+
+map <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips),
+                               data = sdf.ff, color ="black", 
+                               size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips originated", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map
+```
