@@ -9,7 +9,7 @@ output: html_document
 if (!require("pacman")) {install.packages("pacman"); library(pacman)}
 p_load(dplyr, gridExtra, ggplot2, knitr, printr, scales, magrittr, 
        stargazer, readr, pander, stringr, ggmap, maptools)
-p_load_gh("krlmlr/here")
+p_load_gh("krlmlr/here", "rstudio/leaflet")
 
 knitr::opts_knit$set(root.dir = here(".."))
 knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=F)
@@ -22,20 +22,38 @@ source("code/load_data.R")
 source("code/functions.R")
 ```
 
-## Map
+## Map Examples
 
-```{r maps}
+```{r ggmaps}
 shpfile <- 'data/taz/OUATS_AirSage_TAZ.shp'
-sdf <- read.shpfile(shpfile)
+spdf <- read.shpfile(shpfile)
 
-sdf.ff <- fortify(sdf, region="TAZ_ID")
-sdf.ff %<>% left_join(m0401.o, by=c("id"="TAZ_ID"))
+spdf.ff <- fortify(spdf, region="TAZ_ID")
+spdf.ff %<>% left_join(m0401.o, by=c("id"="TAZ_ID"))
 
 map <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips),
-                               data = sdf.ff, color ="black", 
+                               data = spdf.ff, color ="black", 
                                size = 0) +
   coord_map()+
   scale_fill_distiller(name="trips originated", palette = "RdBu", breaks = pretty_breaks(n = 5))+
   theme_nothing(legend = TRUE)
 map
+```
+
+```{r leaflet_maps}
+spdf@data %<>% left_join(m0401.o %>% mutate(TAZ_ID=as.integer(TAZ_ID)))
+pal.qtl <- colorQuantile(palette = "YlOrRd", domain = spdf@data$trips)
+pal.num <- colorNumeric (palette = "YlOrRd", domain = spdf@data$trips)
+leaflet(spdf) %>%
+  addPolygons(
+    stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5,
+    fillColor = ~pal.qtl(trips),
+    label=~stringr::str_c(
+                TAZ_ID,' ',
+                formatC(trips, big.mark = ',', format='d')),
+    labelOptions= labelOptions(direction = 'auto'),
+    highlightOptions = highlightOptions(
+                color='#ff0000', opacity = 1, weight = 2, fillOpacity = 1,
+                bringToFront = TRUE, sendToBack = TRUE)
+  )
 ```
