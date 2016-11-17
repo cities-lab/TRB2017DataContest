@@ -6,17 +6,20 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_knit$set(root.dir = "../")
+if (!require("pacman")) {install.packages("pacman"); library(pacman)}
+p_load(dplyr, gridExtra, ggplot2, knitr, printr, scales, magrittr, 
+       stargazer, readr, pander, stringr, ggmap, maptools)
+p_load_gh("krlmlr/here")
+
+knitr::opts_knit$set(root.dir = here(".."))
 knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=F)
 options(scipen=100)
 options(digits=3)
-
-if (!require("pacman")) {install.packages("pacman"); library(pacman)}
-p_load(dplyr, gridExtra, ggplot2, knitr, printr, scales, magrittr, stargazer, readr, pander, stringr, ggmap, maptools)
 ```
 
 ```{r source, include=F}
 source("code/load_data.R")
+source("code/functions.R")
 ```
 
 ## Map
