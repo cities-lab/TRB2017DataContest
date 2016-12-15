@@ -1,9 +1,9 @@
-setwd("C:/Users/shiwei/Desktop/TRB contest")
-setwd("~/Google Drive/TRB Data Contest")
+#setwd("C:/Users/shiwei/Desktop/TRB contest")
+#setwd("~/Google Drive/TRB Data Contest")
 library(foreign)
 
-TAZ <-read.dbf("OUATS_AirSage_TAZ.dbf")
-union <- read.dbf("Orlando_union.dbf")
+TAZ <-read.dbf("localdata/OUATS_AirSage_TAZ.dbf")
+union <- read.dbf("localdata/Orlando_union.dbf")
 union <- union[order(union$TAZ_ID),]
 
 union$bg_percent <- union$Shape_Area / union$BG_Area
@@ -29,18 +29,24 @@ TAZ.sum <- sum %>%
 
 den <- select(union,TAZ_ID,starts_with("D1"),starts_with("D3"),BG_Area,bg_percent) %>%
   mutate_each(funs(.*BG_Area*bg_percent),starts_with("D1"),starts_with("D3"))
+
 TAZ.den <- den %>%
   group_by(TAZ_ID) %>%
-  summarise_each(funs(sum))
+  summarise_each(funs(sum)) %>%
+  select(-bg_percent)
 
 avg <- select(union, TAZ_ID,D4a,D4c,D4d,D5cei,D5cri,D5dri,D5dei)
 TAZ.avg <- avg %>%
   group_by(TAZ_ID) %>%
   summarise_each(funs(mean))
 
-data <- cbind(TAZ.sum,TAZ.den,TAZ.avg)
 
-data <- cbind(data,TAZ)
+data <- TAZ.sum %>%
+        left_join(TAZ.den) %>%
+        left_join(TAZ.avg) %>%
+        left_join(TAZ)
+
+# data <- cbind(data,TAZ)
 
 data <- data %>%
   mutate_each(funs(./TAZ_Area),starts_with("D1"),starts_with("D3"))
@@ -66,6 +72,4 @@ cleaned_data <- cleaned_data %>%
          R_PCTLOWWAGE = R_LOWWAGEW/TOTPOP10,
          R_PCTAUTO0 = AUTOOWN0/COUNTHU10)
 
-library(psych)
-print(paR2vari <- fa(cleaned_data[,c(47,51,59:60,68:74)],nfactors=3,rotate="varimax",fm="ml",scores = "regression"))
 
