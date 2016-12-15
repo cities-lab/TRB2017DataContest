@@ -1,8 +1,9 @@
+
 #setwd("C:/Users/shiwei/Desktop/TRB contest")
 #setwd("~/Google Drive/TRB Data Contest")
 library(foreign)
 
-TAZ <-read.dbf("data/taz/OUATS_AirSage_TAZ.dbf")
+TAZ <-read.dbf("data/SLD/OUATS_AirSage_TAZ.dbf")
 union <- read.dbf("data/SLD/Orlando_union.dbf")
 union <- union[order(union$TAZ_ID),]
 
@@ -54,7 +55,7 @@ data <- data %>%
 cleaned_data <- data %>%
   select(-D5dri,-D5dei,-E_PCTLOWWA,-E_FEDT10,-E_FEDRET10,-E_FEDOFF10,-E_FEDSVC10,-E_FEDENT10)
 
-write.table(cleaned_data,"cleaned data.csv",sep = ",")
+# write.table(cleaned_data,"cleaned data.csv",sep = ",")
 
 # Population/Employment multiply by bg_percent then summation
 # D1/D3 density, multiply by bg_area and by bg_percent then summation
@@ -71,5 +72,8 @@ cleaned_data <- cleaned_data %>%
          RJ = E5_RET10/EMPTOT,
          R_PCTLOWWAGE = R_LOWWAGEW/TOTPOP10,
          R_PCTAUTO0 = AUTOOWN0/COUNTHU10)
+
+
+
 
 
