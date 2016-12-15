@@ -2,8 +2,8 @@
 #setwd("~/Google Drive/TRB Data Contest")
 library(foreign)
 
-TAZ <-read.dbf("localdata/OUATS_AirSage_TAZ.dbf")
-union <- read.dbf("localdata/Orlando_union.dbf")
+TAZ <-read.dbf("data/taz/OUATS_AirSage_TAZ.dbf")
+union <- read.dbf("data/SLD/Orlando_union.dbf")
 union <- union[order(union$TAZ_ID),]
 
 union$bg_percent <- union$Shape_Area / union$BG_Area
