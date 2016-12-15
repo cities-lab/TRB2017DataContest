@@ -1,0 +1,350 @@
+---
+title: "counts_density_mapping"
+author: "HuajieYang"
+date: "12/14/2016"
+output: html_document
+---
+This R markdown files generate trips originated density(trip counts/area) maps. 
+
+```{r setup, include=FALSE}
+if (!require("pacman")) {install.packages("pacman"); library(pacman)}
+p_load(dplyr, gridExtra, ggplot2, knitr, printr, scales, magrittr, 
+       stargazer, readr, pander, stringr, ggmap, maptools)
+p_load_gh("krlmlr/here", "rstudio/leaflet")
+
+knitr::opts_knit$set(root.dir = here(".."))
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=F)
+options(scipen=100)
+options(digits=3)
+```
+
+
+# Setting 
+```{r}
+source("code/functions.R")
+source("code/load_data.R")
+shpfile <- 'data/taz/OUATS_AirSage_TAZ.shp'
+spdf <- read.shpfile(shpfile)
+spdf.ff <- fortify(spdf, region="TAZ_ID")
+iv.df <- read.csv("cleaned data.csv")
+iv.df <- iv.df %>%
+         mutate(TAZ_ID=as.character(TAZ_ID))
+```
+
+# Monday 
+```{r}
+trip.dataset.monday <- trip.dataset %>%
+                       filter(weekday=="Mon")  %>%
+                       group_by(TAZ_ID=as.character(TAZ_ID)) %>%
+                       summarize(trips=sum(Count)) %>% 
+                       left_join(iv.df, by="TAZ_ID") %>%
+                       mutate(trips.density=trips/TAZ_Area) %>%
+                       ungroup()
+
+spdf.ff.monday <- spdf.ff %>%
+                  left_join(trip.dataset.monday, by=c("id"="TAZ_ID"))
+
+map.monday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
+                               data = spdf.ff.monday, color ="black", 
+                               size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips density", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map.monday
+```
+
+# Tuesday
+```{r}
+trip.dataset.tuesday <- trip.dataset %>%
+  filter(weekday=="Tue")  %>%
+  group_by(TAZ_ID=as.character(TAZ_ID)) %>%
+  summarize(trips=sum(Count)) %>% 
+                       left_join(iv.df, by="TAZ_ID") %>%
+                       mutate(trips.density=trips/TAZ_Area) %>%
+                       ungroup()
+
+
+
+
+spdf.ff.tuesday <- spdf.ff %>%
+  left_join(trip.dataset.tuesday, by=c("id"="TAZ_ID"))
+
+map.tuesday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
+                                      data = spdf.ff.tuesday, color ="black", 
+                                      size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips density", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map.tuesday
+```
+
+# Wednesday 
+```{r}
+trip.dataset.wednesday <- trip.dataset %>%
+  filter(weekday=="Wed")  %>%
+  group_by(TAZ_ID=as.character(TAZ_ID)) %>%
+  summarize(trips=sum(Count)) %>% 
+                       left_join(iv.df, by="TAZ_ID") %>%
+                       mutate(trips.density=trips/TAZ_Area) %>%
+                       ungroup()
+
+
+
+
+spdf.ff.wednesday <- spdf.ff %>%
+  left_join(trip.dataset.wednesday, by=c("id"="TAZ_ID"))
+
+map.wednesday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
+                                      data = spdf.ff.wednesday, color ="black", 
+                                      size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips density", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map.wednesday
+```
+
+# Thursday 
+```{r}
+trip.dataset.thursday <- trip.dataset %>%
+  filter(weekday=="Thu")  %>%
+  group_by(TAZ_ID=as.character(TAZ_ID)) %>%
+  summarize(trips=sum(Count)) %>% 
+                       left_join(iv.df, by="TAZ_ID") %>%
+                       mutate(trips.density=trips/TAZ_Area) %>%
+                       ungroup()
+
+
+
+
+spdf.ff.thursday <- spdf.ff %>%
+  left_join(trip.dataset.thursday, by=c("id"="TAZ_ID"))
+
+map.thursday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
+                                      data = spdf.ff.thursday, color ="black", 
+                                      size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips density", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map.thursday
+```
+
+# Friday 
+```{r}
+trip.dataset.friday <- trip.dataset %>%
+  filter(weekday=="Fri")  %>%
+  group_by(TAZ_ID=as.character(TAZ_ID)) %>%
+  summarize(trips=sum(Count)) %>% 
+                       left_join(iv.df, by="TAZ_ID") %>%
+                       mutate(trips.density=trips/TAZ_Area) %>%
+                       ungroup()
+
+
+
+spdf.ff.friday <- spdf.ff %>%
+  left_join(trip.dataset.friday, by=c("id"="TAZ_ID"))
+
+map.friday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
+                                      data = spdf.ff.friday, color ="black", 
+                                      size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips density", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map.friday
+```
+
+# Saturday 
+```{r}
+trip.dataset.saturday <- trip.dataset %>%
+  filter(weekday=="Sat")  %>%
+  group_by(TAZ_ID=as.character(TAZ_ID)) %>%
+ summarize(trips=sum(Count)) %>% 
+                       left_join(iv.df, by="TAZ_ID") %>%
+                       mutate(trips.density=trips/TAZ_Area) %>%
+                       ungroup()
+
+
+spdf.ff.saturday <- spdf.ff %>%
+  left_join(trip.dataset.saturday, by=c("id"="TAZ_ID"))
+
+map.saturday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
+                                      data = spdf.ff.saturday, color ="black", 
+                                      size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips density", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map.saturday
+```
+
+# Sunday 
+```{r}
+trip.dataset.sunday <- trip.dataset %>%
+  filter(weekday=="Sun")  %>%
+  group_by(TAZ_ID=as.character(TAZ_ID)) %>%
+ summarize(trips=sum(Count)) %>% 
+                       left_join(iv.df, by="TAZ_ID") %>%
+                       mutate(trips.density=trips/TAZ_Area) %>%
+                       ungroup()
+
+
+
+
+spdf.ff.sunday <- spdf.ff %>%
+  left_join(trip.dataset.sunday, by=c("id"="TAZ_ID"))
+
+map.sunday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
+                                      data = spdf.ff.sunday, color ="black", 
+                                      size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips density", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map.sunday
+```
+
+# Home worker 
+```{r}
+trip.dataset.HomeWorker <- trip.dataset %>%
+  filter(Subscriber_Class=="Home Worker")  %>%
+  group_by(TAZ_ID=as.character(TAZ_ID)) %>%
+  summarize(trips=sum(Count)) %>% 
+                       left_join(iv.df, by="TAZ_ID") %>%
+                       mutate(trips.density=trips/TAZ_Area) %>%
+                       ungroup()
+
+
+
+
+spdf.ff.HomeWorker <- spdf.ff %>%
+  left_join(trip.dataset.HomeWorker, by=c("id"="TAZ_ID"))
+
+map.HomeWorker <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
+                                      data = spdf.ff.HomeWorker, color ="black", 
+                                      size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips density", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map.HomeWorker
+```
+
+# Inbound Commuter
+```{r}
+trip.dataset.InboundCommuter <- trip.dataset %>%
+  filter(Subscriber_Class=="Inbound Commuter")  %>%
+  group_by(TAZ_ID=as.character(TAZ_ID)) %>%
+summarize(trips=sum(Count)) %>% 
+                       left_join(iv.df, by="TAZ_ID") %>%
+                       mutate(trips.density=trips/TAZ_Area) %>%
+                       ungroup()
+
+
+
+
+spdf.ff.InboundCommuter <- spdf.ff %>%
+  left_join(trip.dataset.InboundCommuter, by=c("id"="TAZ_ID"))
+
+map.InboundCommuter <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
+                                      data = spdf.ff.InboundCommuter, color ="black", 
+                                      size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips density", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map.InboundCommuter
+```
+
+# Long Term Visitor
+```{r}
+trip.dataset.LongTermVisitor <- trip.dataset %>%
+  filter(Subscriber_Class=="Long Term Visitor")  %>%
+  group_by(TAZ_ID=as.character(TAZ_ID)) %>%
+  summarize(trips=sum(Count)) %>% 
+                       left_join(iv.df, by="TAZ_ID") %>%
+                       mutate(trips.density=trips/TAZ_Area) %>%
+                       ungroup()
+
+
+
+spdf.ff.LongTermVisitor <- spdf.ff %>%
+  left_join(trip.dataset.LongTermVisitor, by=c("id"="TAZ_ID"))
+
+map.LongTermVisitor <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
+                                      data = spdf.ff.LongTermVisitor, color ="black", 
+                                      size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips density", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map.LongTermVisitor
+```
+
+# Outbound Commuter 
+```{r}
+trip.dataset.OutboundCommuter <- trip.dataset %>%
+  filter(Subscriber_Class=="Outbound Commuter")  %>%
+  group_by(TAZ_ID=as.character(TAZ_ID)) %>%
+  summarize(trips=sum(Count)) %>% 
+                       left_join(iv.df, by="TAZ_ID") %>%
+                       mutate(trips.density=trips/TAZ_Area) %>%
+                       ungroup()
+
+
+
+spdf.ff.OutboundCommuter <- spdf.ff %>%
+  left_join(trip.dataset.OutboundCommuter, by=c("id"="TAZ_ID"))
+
+map.OutboundCommuter <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
+                                      data = spdf.ff.OutboundCommuter, color ="black", 
+                                      size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips density", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map.OutboundCommuter
+```
+
+# Resident Worker
+```{r}
+trip.dataset.ResidentWorker <- trip.dataset %>%
+  filter(Subscriber_Class=="Resident Worker")  %>%
+  group_by(TAZ_ID=as.character(TAZ_ID)) %>%
+ summarize(trips=sum(Count)) %>% 
+                       left_join(iv.df, by="TAZ_ID") %>%
+                       mutate(trips.density=trips/TAZ_Area) %>%
+                       ungroup()
+
+
+
+
+spdf.ff.ResidentWorker <- spdf.ff %>%
+  left_join(trip.dataset.ResidentWorker, by=c("id"="TAZ_ID"))
+
+map.ResidentWorker <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
+                                                data = spdf.ff.ResidentWorker, color ="black", 
+                                                size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips density", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map.ResidentWorker
+```
+
+# Short Term Visitor 
+```{r}
+trip.dataset.ShortTermVisitor <- trip.dataset %>%
+  filter(Subscriber_Class=="Short Term Visitor")  %>%
+  group_by(TAZ_ID=as.character(TAZ_ID)) %>%
+ summarize(trips=sum(Count)) %>% 
+                       left_join(iv.df, by="TAZ_ID") %>%
+                       mutate(trips.density=trips/TAZ_Area) %>%
+                       ungroup()
+
+
+
+
+spdf.ff.ShortTermVisitor <- spdf.ff %>%
+  left_join(trip.dataset.ShortTermVisitor, by=c("id"="TAZ_ID"))
+
+map.ShortTermVisitor <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
+                                                data = spdf.ff.ShortTermVisitor, color ="black", 
+                                                size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips density", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map.ShortTermVisitor
+```
+
