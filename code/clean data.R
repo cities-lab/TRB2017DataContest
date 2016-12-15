@@ -7,6 +7,19 @@ TAZ <-read.dbf("data/SLD/OUATS_AirSage_TAZ.dbf")
 union <- read.dbf("data/SLD/Orlando_union.dbf")
 union <- union[order(union$TAZ_ID),]
 
+# Replace -99999 with 0
+union <- union %>%
+         mutate(D4a=ifelse(D4a < -90000, 0, D4a),
+                D4c=ifelse(D4c < -90000, 0, D4c),
+                D4d=ifelse(D4d < -90000, 0, D4d),
+                D5br=ifelse(D5br < -90000, 0, D5br),
+                D5be=ifelse(D5be < -90000, 0, D5be),
+                D5dri=ifelse(D5dri < -90000, 0, D5dri),
+                D5de=ifelse(D5de < -90000, 0, D5de),
+                D5dei=ifelse(D5dei < -90000, 0, D5dei)
+                )
+
+
 union$bg_percent <- union$Shape_Area / union$BG_Area
 
 # to exclude tiny calculation errors/useless weights in map union process due to projection differences between TAZ and BG maps
