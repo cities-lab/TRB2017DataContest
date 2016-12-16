@@ -1,0 +1,46 @@
+---
+title: "Paper draft"
+author: "HuajieYang"
+date: "12/16/2016"
+output: html_document
+---
+
+
+# Research question: 
+1. Market segmentation 
+2. Spatial autocorrelation 
+
+
+# A spatial analysis of how land use factors affect trip generation by subscriber classes 
+
+Abstract
+
+
+# Introduction 
+Traffic congestion has been a vexing problem across the major cities in the US, which decease infrastructure efficiency, increase energy consumption and reduce living quality(Ewing & Cervero, 2001; Ewing & Cervero, 2010). This urges many planners and researchers to turn to land use and transportation planning for moderating trip demand and hence relieving traffic congestion. Mixed land use is highly recommended by many land use and transportation planners, since it limits trip demand by increasing multipurpose trips, shortens trip distance through compact development, and decreases automobile dependence via increasing share of bicycling, walking and transit. 
+Factors influencing travel demand falls into three categories density, diversity and design (Cervero & Kockelman, 1997).  …literature review …
+
+However, existing studies have conflicting conclusion about whether mixed land use moderating trip generation. …literature review …These inconsistent conclusions results from three methodological issues (Lin & Hsiao, 2006). First, effects of mixed land use on trip generation are not homogeneous among different socioeconomic conditions. Second, incomplete examination of underlying assumptions about theoretical methods biases estimations. Third, improper selection of control factors generates biased effects of mixed land use on trip generation. 
+
+This studies attempts to identify effects of mixed land use on trip generation, and provides suggestions for planners to moderating trip generation. Given the limitation of existing studies, we reexamine effects of mixed land use on trip generation with a framework that accounting for methodological issues resulting in conflicting conclusions. Separate model for each subscriber class is estimated at Transportation Analysis Zone (TAZ) to investigate how effects of mixed land use vary in according with socioeconomic conditions. Second, spatial autocorrelation is incorporated in models to take spatial contiguity between TAZs into account. The reminder of this paper is organized as follows. First, comprehensive literatures are reviewed. Second, data description and methods are presented. Then, regression analysis is applied to estimate the influences of mixed land use on trip generation. This paper closes with conclusions. 
+
+
+# Literature review
+Factors affect trip generation 
+Existing research have conflicting conclusions. 
+Review methods: why estimate 
+
+
+
+# Data 
+The Smart Location Database is a nationwide geographic data resource provided by EPA for measuring location efficiency (Ramsey and Bell, 2014). It includes more than 90 attributes summarizing characteristics such as housing density, diversity of land use, neighborhood design, destination accessibility, transit service, employment, and demographics. See Ramsey and Bell (2014) for a complete list of variables available. Most attributes are available for every census block group in the United States for 2010. Those variables are selected for their impacts to travel behavior, especially the 5D variables identified in the literature (Ewing & Cervero, 2001, 2010) as well as transportation supply and services, particularly the transit service. Based on the SLD, location type, area type and development type are identified.  
+
+Descriptive statistics 
+
+
+Methods 
+
+
+Analysis 
+
+Conclusion 
