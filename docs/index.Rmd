@@ -1,30 +1,173 @@
 ---
-title: "Writeup"
-author: "Liming Wang"
-date: "11/15/2016"
+title: "Visualization and Modeling of AirSage Trips Data"
+author: "Huajie Yang, Wei Shi, Yi Wang, and Liming Wang (Faculty Advisor)"
+date: "12/15/2016"
 output: html_document
+bibliography: references.bib
 ---
+
+## Abstract
+
+## Introduction
+1. Intro of AirSage Data
+
+2. Describe what we have done
+
+This paper is available on [github](https://cities-lab.github.io/TRB2017DataContest/). We follow the practice of reproducible research [@Gandrud2015] for our work and our writing-up is fully reproducible from a Rmarkdown file and R scripts, the source of which is available on our github repository at https://github.com/cities-lab/TRB2017DataContest (the data files are withheld according to AirSage's confidentiality agreement).
+
 
 ```{r setup, include=FALSE}
 if (!require("pacman")) {install.packages("pacman"); library(pacman)}
 p_load(dplyr, gridExtra, ggplot2, knitr, printr, scales, magrittr, 
        stargazer, readr, pander, stringr, ggmap, maptools)
-p_load_gh("krlmlr/here", "rstudio/leaflet")
+p_load_gh("rstudio/leaflet", "dgrtwo/gganimate")
 
-knitr::opts_knit$set(root.dir = here(".."))
-knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=F)
+#opts_knit$set(root.dir = here(".."))
+knitr::opts_knit$set(root.dir = normalizePath("..")) 
+opts_chunk$set(echo=FALSE, message=FALSE, warning=F)
 options(scipen=100)
 options(digits=3)
 ```
 
 ```{r source, include=F}
-source("code/load_data.R")
 source("code/functions.R")
+source("code/load_data.R")
+source("code/agg_sld.R")
 ```
 
-## Map Examples
+## Visualization
+### Trip Purpose
+```{r}
+trips.date_hour_purpose <- trips.df %>% 
+  #filter(Start_Weekday) %>% 
+  group_by(Start_Date, Start_Hour, Purpose) %>% 
+  summarize(trips=sum(Count),
+            Start_Day=first(Start_Day),
+            Start_Weekend=first(Start_Weekend)) %>% 
+  I(#trips_scaled=rescale(trips),
+         #Start_Day=format(Start_Date, "%a"),
+         #Start_Weekend=ifelse(Start_Day %in% c("Sun", "Sat"), "Weekend", "Weekday"),
+         #Start_Day=factor(Start_Day, levels=c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"))
+         ) %>% 
+  ungroup()
+
+ggplot(data=trips.date_hour_purpose, aes(x=Start_Hour, y=trips, colour=Purpose, group=Purpose)) +
+  #geom_area(position = 'stack') +
+  stat_smooth() + ylim(0, 500000) +
+  facet_wrap(~Start_Day)
+  #scale_y_continuous(labels = percent) +
+  #labs(x="standard dev of residuals", y="Normalized mean error") +
+  #scale_colour_discrete(guide=FALSE) +
+  #scale_y_log10()
+
+ggplot(data=trips.date_hour_purpose, aes(x=Start_Hour, y=trips, colour=Purpose, group=Purpose)) +
+  #geom_area(position = 'stack') +
+  stat_smooth() + ylim(0, 500000) +
+  facet_wrap(~Start_Weekend)
+
+trips.date_hour_purpose %<>% 
+  group_by(Start_Date, Purpose) %>% 
+  mutate(trips_scaled=scale(trips))
+
+base_size <- 9
+(p <- ggplot(trips.date_hour_purpose, aes(Start_Hour, Start_Date)) + geom_tile(aes(fill = trips_scaled),
+     colour = "white") + scale_fill_gradient(low = "white", high = "red") + 
+     # theme_grey(base_size = base_size) + labs(x = "", y = "") + 
+     # scale_x_discrete(expand = c(0, 0)) + scale_y_discrete(expand = c(0, 0)) + 
+     # theme(legend.position = "none", axis.ticks = element_blank(), 
+     #      axis.text.x = element_text(size = base_size * 0.8, angle = 330, 
+     #                               hjust = 0, colour = "grey50"))    +
+    facet_wrap(~Purpose)
+    )
+```
+
+### Subscriber Class
+```{r}
+trips.date_hour_class <- trips.df %>% 
+  #filter(Start_Weekday) %>% 
+  group_by(Start_Date, Start_Hour, Subscriber_Class) %>% 
+  summarize(trips=sum(Count)) %>% 
+  mutate(trips_scaled=rescale(trips),
+         Start_Day=format(Start_Date, "%a"),
+         Start_Weekend=ifelse(Start_Day %in% c("Sun", "Sat"), "Weekend", "Weekday"),
+         Start_Day=factor(Start_Day, levels=c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"))
+         ) %>% 
+  ungroup()
+
+ggplot(data=trips.date_hour_class, aes(x=Start_Hour, y=trips, colour=Subscriber_Class, group=Subscriber_Class)) +
+  #geom_area(position = 'stack') +
+  stat_smooth() + ylim(0, 500000) +
+  facet_wrap(~Start_Day)
+  #scale_y_continuous(labels = percent) +
+  #labs(x="standard dev of residuals", y="Normalized mean error") +
+  #scale_colour_discrete(guide=FALSE) +
+  #scale_y_log10()
+
+ggplot(data=trips.date_hour_class, aes(x=Start_Hour, y=trips, colour=Subscriber_Class, group=Subscriber_Class)) +
+  #geom_area(position = 'stack') +
+  stat_smooth() + ylim(0, 500000) +
+  facet_wrap(~Start_Weekend)
+
+trips.date_hour_class %<>% 
+  group_by(Start_Date, Subscriber_Class) %>% 
+  mutate(trips_scaled=scale(trips))
+```
+
+```{r}
+(p <- ggplot(trips.date_hour_class, aes(Start_Hour, Start_Date)) + geom_tile(aes(fill = trips_scaled),
+     colour = "white") + scale_fill_gradient(low = "white", high = "red") + 
+    facet_wrap(~Subscriber_Class)
+    )
+```
+
+```{r animation}
+# first compute culumative trips
+trips.d1 <- trips.df %>% 
+  filter(Start_Date=="2014-04-01")
+
+cumtrips.out <- trips.d1 %>%   
+  group_by(Origin_Zone, Start_Hour) %>% 
+  summarize(trips=sum(Count)) %>% 
+  mutate(cumtrips.out=cumsum(trips)) %>% 
+  select(Origin_Zone, Start_Hour, cumtrips.out)
+
+cumtrips.in <- trips.d1 %>%   
+  group_by(Destination_Zone, Start_Hour) %>% 
+  summarize(trips=sum(Count)) %>% 
+  mutate(cumtrips.in=cumsum(trips)) %>% 
+  select(Destination_Zone, Start_Hour, cumtrips.in)
+  
+cumtrips <- cumtrips.in %>% 
+  left_join(cumtrips.out, 
+            by=c("Destination_Zone"="Origin_Zone", "Start_Hour"="Start_Hour")) %>% 
+  mutate(cumtrips=cumtrips.in - cumtrips.out,
+         cumtrips=ifelse(cumtrips<0, 0, cumtrips),
+         id=as.character(Destination_Zone))
+
+spdf.cumtrips <- spdf.ff %>% 
+  left_join(cumtrips, by=c("id"="id"))
+
+map <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=cumtrips),
+                               data = spdf.cumtrips, color ="black", 
+                               size = 0) +
+  coord_map()+
+  scale_fill_distiller(name="trips arrived", palette = "RdBu", breaks = pretty_breaks(n = 5))+
+  theme_nothing(legend = TRUE)
+map
+
+require(gganimate)
+theme_set(theme_bw())
+p <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=cumtrips, frame=Start_Hour),
+                               data = spdf.cumtrips, color ="black", 
+                               size = 0) +
+    coord_map()+
+    scale_fill_distiller(name="trips arrived", palette = "RdBu", breaks = pretty_breaks(n = 5))
+gg_animate(p)
+```
 
 ```{r ggmaps}
+
+
 shpfile <- 'data/taz/OUATS_AirSage_TAZ.shp'
 spdf <- read.shpfile(shpfile)
 
@@ -39,6 +182,7 @@ map <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips),
   theme_nothing(legend = TRUE)
 map
 ```
+
 
 ```{r leaflet_maps}
 spdf@data %<>% left_join(m0401.o %>% mutate(TAZ_ID=as.integer(TAZ_ID)))
@@ -58,12 +202,11 @@ leaflet(spdf) %>%
   )
 ```
 
+## References
+<! -- Gandrud, C., 2015. Reproducible Research with R and R Studio, Second Edition, 2 edition. ed. Chapman and Hall/CRC, Boca Raton. -->
 
-```{r sessioninfo, include=F, results='hide'}
-sessionInfo()
-```
 
-## Session Info
+<!--## Session Info-->
 ```{r session_info}
-pander(devtools::session_info())
+#pander(devtools::session_info())
 ```
