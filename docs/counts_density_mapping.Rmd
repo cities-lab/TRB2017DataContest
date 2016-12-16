@@ -23,17 +23,20 @@ options(digits=3)
 ```{r}
 source("code/functions.R")
 source("code/load_data.R")
+source("code/agg_sld.R")
+
 shpfile <- 'data/taz/OUATS_AirSage_TAZ.shp'
 spdf <- read.shpfile(shpfile)
 spdf.ff <- fortify(spdf, region="TAZ_ID")
-iv.df <- read.csv("cleaned data.csv")
-iv.df <- iv.df %>%
-         mutate(TAZ_ID=as.character(TAZ_ID))
+
+# iv.df <- read.csv("cleaned data.csv")
+# iv.df <- iv.df %>%
+#          mutate(TAZ_ID=as.character(TAZ_ID))
 ```
 
 # Monday 
 ```{r}
-trip.dataset.monday <- trip.dataset %>%
+trips.df.monday <- trips.df %>%
                        filter(weekday=="Mon")  %>%
                        group_by(TAZ_ID=as.character(TAZ_ID)) %>%
                        summarize(trips=sum(Count)) %>% 
@@ -42,7 +45,7 @@ trip.dataset.monday <- trip.dataset %>%
                        ungroup()
 
 spdf.ff.monday <- spdf.ff %>%
-                  left_join(trip.dataset.monday, by=c("id"="TAZ_ID"))
+                  left_join(trips.df.monday, by=c("id"="TAZ_ID"))
 
 map.monday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
                                data = spdf.ff.monday, color ="black", 
@@ -55,7 +58,7 @@ map.monday
 
 # Tuesday
 ```{r}
-trip.dataset.tuesday <- trip.dataset %>%
+trips.df.tuesday <- trips.df %>%
   filter(weekday=="Tue")  %>%
   group_by(TAZ_ID=as.character(TAZ_ID)) %>%
   summarize(trips=sum(Count)) %>% 
@@ -67,7 +70,7 @@ trip.dataset.tuesday <- trip.dataset %>%
 
 
 spdf.ff.tuesday <- spdf.ff %>%
-  left_join(trip.dataset.tuesday, by=c("id"="TAZ_ID"))
+  left_join(trips.df.tuesday, by=c("id"="TAZ_ID"))
 
 map.tuesday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
                                       data = spdf.ff.tuesday, color ="black", 
@@ -80,7 +83,7 @@ map.tuesday
 
 # Wednesday 
 ```{r}
-trip.dataset.wednesday <- trip.dataset %>%
+trips.df.wednesday <- trips.df %>%
   filter(weekday=="Wed")  %>%
   group_by(TAZ_ID=as.character(TAZ_ID)) %>%
   summarize(trips=sum(Count)) %>% 
@@ -92,7 +95,7 @@ trip.dataset.wednesday <- trip.dataset %>%
 
 
 spdf.ff.wednesday <- spdf.ff %>%
-  left_join(trip.dataset.wednesday, by=c("id"="TAZ_ID"))
+  left_join(trips.df.wednesday, by=c("id"="TAZ_ID"))
 
 map.wednesday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
                                       data = spdf.ff.wednesday, color ="black", 
@@ -105,7 +108,7 @@ map.wednesday
 
 # Thursday 
 ```{r}
-trip.dataset.thursday <- trip.dataset %>%
+trips.df.thursday <- trips.df %>%
   filter(weekday=="Thu")  %>%
   group_by(TAZ_ID=as.character(TAZ_ID)) %>%
   summarize(trips=sum(Count)) %>% 
@@ -117,7 +120,7 @@ trip.dataset.thursday <- trip.dataset %>%
 
 
 spdf.ff.thursday <- spdf.ff %>%
-  left_join(trip.dataset.thursday, by=c("id"="TAZ_ID"))
+  left_join(trips.df.thursday, by=c("id"="TAZ_ID"))
 
 map.thursday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
                                       data = spdf.ff.thursday, color ="black", 
@@ -130,7 +133,7 @@ map.thursday
 
 # Friday 
 ```{r}
-trip.dataset.friday <- trip.dataset %>%
+trips.df.friday <- trips.df %>%
   filter(weekday=="Fri")  %>%
   group_by(TAZ_ID=as.character(TAZ_ID)) %>%
   summarize(trips=sum(Count)) %>% 
@@ -141,7 +144,7 @@ trip.dataset.friday <- trip.dataset %>%
 
 
 spdf.ff.friday <- spdf.ff %>%
-  left_join(trip.dataset.friday, by=c("id"="TAZ_ID"))
+  left_join(trips.df.friday, by=c("id"="TAZ_ID"))
 
 map.friday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
                                       data = spdf.ff.friday, color ="black", 
@@ -154,7 +157,7 @@ map.friday
 
 # Saturday 
 ```{r}
-trip.dataset.saturday <- trip.dataset %>%
+trips.df.saturday <- trips.df %>%
   filter(weekday=="Sat")  %>%
   group_by(TAZ_ID=as.character(TAZ_ID)) %>%
  summarize(trips=sum(Count)) %>% 
@@ -164,7 +167,7 @@ trip.dataset.saturday <- trip.dataset %>%
 
 
 spdf.ff.saturday <- spdf.ff %>%
-  left_join(trip.dataset.saturday, by=c("id"="TAZ_ID"))
+  left_join(trips.df.saturday, by=c("id"="TAZ_ID"))
 
 map.saturday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
                                       data = spdf.ff.saturday, color ="black", 
@@ -177,7 +180,7 @@ map.saturday
 
 # Sunday 
 ```{r}
-trip.dataset.sunday <- trip.dataset %>%
+trips.df.sunday <- trips.df %>%
   filter(weekday=="Sun")  %>%
   group_by(TAZ_ID=as.character(TAZ_ID)) %>%
  summarize(trips=sum(Count)) %>% 
@@ -189,7 +192,7 @@ trip.dataset.sunday <- trip.dataset %>%
 
 
 spdf.ff.sunday <- spdf.ff %>%
-  left_join(trip.dataset.sunday, by=c("id"="TAZ_ID"))
+  left_join(trips.df.sunday, by=c("id"="TAZ_ID"))
 
 map.sunday <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
                                       data = spdf.ff.sunday, color ="black", 
@@ -202,7 +205,7 @@ map.sunday
 
 # Home worker 
 ```{r}
-trip.dataset.HomeWorker <- trip.dataset %>%
+trips.df.HomeWorker <- trips.df %>%
   filter(Subscriber_Class=="Home Worker")  %>%
   group_by(TAZ_ID=as.character(TAZ_ID)) %>%
   summarize(trips=sum(Count)) %>% 
@@ -214,7 +217,7 @@ trip.dataset.HomeWorker <- trip.dataset %>%
 
 
 spdf.ff.HomeWorker <- spdf.ff %>%
-  left_join(trip.dataset.HomeWorker, by=c("id"="TAZ_ID"))
+  left_join(trips.df.HomeWorker, by=c("id"="TAZ_ID"))
 
 map.HomeWorker <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
                                       data = spdf.ff.HomeWorker, color ="black", 
@@ -227,7 +230,7 @@ map.HomeWorker
 
 # Inbound Commuter
 ```{r}
-trip.dataset.InboundCommuter <- trip.dataset %>%
+trips.df.InboundCommuter <- trips.df %>%
   filter(Subscriber_Class=="Inbound Commuter")  %>%
   group_by(TAZ_ID=as.character(TAZ_ID)) %>%
 summarize(trips=sum(Count)) %>% 
@@ -239,7 +242,7 @@ summarize(trips=sum(Count)) %>%
 
 
 spdf.ff.InboundCommuter <- spdf.ff %>%
-  left_join(trip.dataset.InboundCommuter, by=c("id"="TAZ_ID"))
+  left_join(trips.df.InboundCommuter, by=c("id"="TAZ_ID"))
 
 map.InboundCommuter <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
                                       data = spdf.ff.InboundCommuter, color ="black", 
@@ -252,7 +255,7 @@ map.InboundCommuter
 
 # Long Term Visitor
 ```{r}
-trip.dataset.LongTermVisitor <- trip.dataset %>%
+trips.df.LongTermVisitor <- trips.df %>%
   filter(Subscriber_Class=="Long Term Visitor")  %>%
   group_by(TAZ_ID=as.character(TAZ_ID)) %>%
   summarize(trips=sum(Count)) %>% 
@@ -263,7 +266,7 @@ trip.dataset.LongTermVisitor <- trip.dataset %>%
 
 
 spdf.ff.LongTermVisitor <- spdf.ff %>%
-  left_join(trip.dataset.LongTermVisitor, by=c("id"="TAZ_ID"))
+  left_join(trips.df.LongTermVisitor, by=c("id"="TAZ_ID"))
 
 map.LongTermVisitor <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
                                       data = spdf.ff.LongTermVisitor, color ="black", 
@@ -276,7 +279,7 @@ map.LongTermVisitor
 
 # Outbound Commuter 
 ```{r}
-trip.dataset.OutboundCommuter <- trip.dataset %>%
+trips.df.OutboundCommuter <- trips.df %>%
   filter(Subscriber_Class=="Outbound Commuter")  %>%
   group_by(TAZ_ID=as.character(TAZ_ID)) %>%
   summarize(trips=sum(Count)) %>% 
@@ -287,7 +290,7 @@ trip.dataset.OutboundCommuter <- trip.dataset %>%
 
 
 spdf.ff.OutboundCommuter <- spdf.ff %>%
-  left_join(trip.dataset.OutboundCommuter, by=c("id"="TAZ_ID"))
+  left_join(trips.df.OutboundCommuter, by=c("id"="TAZ_ID"))
 
 map.OutboundCommuter <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
                                       data = spdf.ff.OutboundCommuter, color ="black", 
@@ -300,7 +303,7 @@ map.OutboundCommuter
 
 # Resident Worker
 ```{r}
-trip.dataset.ResidentWorker <- trip.dataset %>%
+trips.df.ResidentWorker <- trips.df %>%
   filter(Subscriber_Class=="Resident Worker")  %>%
   group_by(TAZ_ID=as.character(TAZ_ID)) %>%
  summarize(trips=sum(Count)) %>% 
@@ -312,7 +315,7 @@ trip.dataset.ResidentWorker <- trip.dataset %>%
 
 
 spdf.ff.ResidentWorker <- spdf.ff %>%
-  left_join(trip.dataset.ResidentWorker, by=c("id"="TAZ_ID"))
+  left_join(trips.df.ResidentWorker, by=c("id"="TAZ_ID"))
 
 map.ResidentWorker <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
                                                 data = spdf.ff.ResidentWorker, color ="black", 
@@ -325,7 +328,7 @@ map.ResidentWorker
 
 # Short Term Visitor 
 ```{r}
-trip.dataset.ShortTermVisitor <- trip.dataset %>%
+trips.df.ShortTermVisitor <- trips.df %>%
   filter(Subscriber_Class=="Short Term Visitor")  %>%
   group_by(TAZ_ID=as.character(TAZ_ID)) %>%
  summarize(trips=sum(Count)) %>% 
@@ -337,7 +340,7 @@ trip.dataset.ShortTermVisitor <- trip.dataset %>%
 
 
 spdf.ff.ShortTermVisitor <- spdf.ff %>%
-  left_join(trip.dataset.ShortTermVisitor, by=c("id"="TAZ_ID"))
+  left_join(trips.df.ShortTermVisitor, by=c("id"="TAZ_ID"))
 
 map.ShortTermVisitor <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips.density),
                                                 data = spdf.ff.ShortTermVisitor, color ="black", 
