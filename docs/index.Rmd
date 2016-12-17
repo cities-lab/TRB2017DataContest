@@ -113,6 +113,11 @@ trips.date_hour_class %<>%
   mutate(trips_scaled=scale(trips))
 ```
 
+Comparing the travel pattern differences among subscriber classes, we found that short term visitors made the most trips, followed by long term visitors, resident workers and home workers, whereas there were relatively less trips made by inbound and outbound commuters. In terms of time of day, the trip count was an apparent inverse U curve indicating more trips were made in daytime, with PM peak trend for resident workers. All subscriber classes seemed to have late starts in the mornings and early ends in the evenings in weekends than weekdays. Resident workers made relatively more trips in late afternoon time, possibly after-work errand trips, in the weekdays than weekends.
+
+As there were significant differences between weekdays and weekends, we closely compare the travel pattern differences between weekdays and weekends among different subscriber classes. It was clear that almost all subscriber class, except long term visitors made more trips in weekdays than in weekends. The resident workers' travel patterns of more late afternoon trips in weekdays was more apparent in the weekend/weekday comparison graph. In addition, the variation of trip generation, represented by the grey shady areas around the lines, were bigger in weekends than weekdays, indicating trips generation in weekends were less predictable than weekdays.
+
+
 ```{r}
 (p <- ggplot(trips.date_hour_class, aes(Start_Hour, Start_Date)) + geom_tile(aes(fill = trips_scaled),
      colour = "white") + scale_fill_gradient(low = "white", high = "red") + 
