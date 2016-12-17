@@ -8,7 +8,7 @@ output:
 bibliography: "references.bib"
 ---
 
-[github repository](https://github.com/cities-lab/TRB2017DataContest)
+[**github repository**](https://github.com/cities-lab/TRB2017DataContest)
 
 ## Introduction
 
@@ -39,6 +39,7 @@ source("code/do_map.R")
 ```
 
 ## Visualization
+
 ### Temporal Variation of Trips by Day of Week and Trip Purpose 
 
 We first visualize the variation of trip frequencies by time-of-day, day of week, and trip purpose. We expect trips to vary by all the three dimensions, likely more so for time-of-day and trip purpose than day of week. 
@@ -52,6 +53,7 @@ Another noticeable pattern in Figure 1 is that, compared with weekdays (Monday-F
 As shown in Figure 1, the variance (shades) of OO trip frequencies is the largest, followed by HW, HH, HO and WH trips. The variance of OH, WO and OW trip frequencies is small. The variance of work-related (WO, WH, WW, OW, HW) trip frequencies on weekdays is larger than those on the weekends. The difference in variance between weekday and weekend seems to make sense that much fewer HW trips are made during the weekends than during weekdays. 
 
 ```{r purpose, echo=F}
+
 trips.date_hour_purpose <- trips.df %>% 
   #filter(Start_Weekday) %>% 
   group_by(Start_Date, Start_Hour, Purpose) %>% 
@@ -104,6 +106,7 @@ trips.date_hour_purpose %<>%
     ggtitle("Temporal Variation of Trips by Date and Hour and Trip Purpose")
     )
 ```
+
 
 ### Temporal Variation of Trips by Day of Week and Subscriber Class
 We repeat the above visualization for subscriber class. Comparing the difference in travel patternamong subscriber classes, we found that short term visitors made the most trips, followed by long term visitors, resident workers and home workers, whereas there were relatively less trips made by inbound and outbound commuters. In terms of time of day, the trip count is an apparent inverse U curve indicating more trips were made in daytime, with PM peak trend for resident workers. All subscriber classes seemed to have later starts in the mornings and earlier ends in the evenings in weekends than weekdays. Resident workers made relatively more trips in late afternoon , possibly after-work errands, in the weekdays than weekends.
