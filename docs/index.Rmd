@@ -2,14 +2,19 @@
 title: "Visualize Temporal and Spatial Patterns of AirSage Trips Data"
 author: "Huajie Yang, Wei Shi, Yi Wang, and Liming Wang (Faculty Advisor)"
 date: "12/16/2016"
-output: html_document
+output: 
+  html_document:
+    self_contained: true
 bibliography: "references.bib"
 ---
 
-## Introduction
-AirSage collects anonymous wireless signaling data and processes them into aggregated information of the location, movement and flow of people. For transportation research, AirSage data can be processed as OD flows at the common Traffic Analysis Zone (TAZ) level. Besides its nationwide coverage, the data is at high temporal resolution over a long-time span, a rarity for other transportation data sources.
+[github repository](https://github.com/cities-lab/TRB2017DataContest)
 
-For this project, we are taking advantage of the data's high temporal resolution and long-time span to visualize and explore the temporal and spatial patterns of trip flow. We visualize various aspects of the data, in particular, the temporal variations of travel flow and the difference in patterns across trip purpose and subscriber class. We also visualize the temporal-spatial pattern of travel flow via annimations of net trips at the TAZ level.
+## Introduction
+
+AirSage collects anonymous wireless signaling data and processes them into aggregated information of the location, movement and flow of people. For transportation research, AirSage data can be processed as OD flows at the common Traffic Analysis Zone (TAZ) level. Besides its nationwide coverage, the data is at a high temporal resolution over a long-time span, a rarity for other transportation data sources.
+
+For this project, we are taking advantage of the data's high temporal resolution and long-time span to visualize and explore the temporal and spatial patterns of trip flow. We visualize various aspects of the data, in particular, the temporal variations of trips and flow and the difference in patterns across trip purpose and subscriber class. We also visualize the temporal-spatial pattern of travel flow via an animation of net trips at the TAZ level.
 
 This paper is available on [github](https://cities-lab.github.io/TRB2017DataContest/). We follow the practice of reproducible research [@Gandrud2015] for our work and this write-up is fully reproducible from a Rmarkdown file and R scripts, the source code of which is available on a github repository at https://github.com/cities-lab/TRB2017DataContest (the data files are withheld according to AirSage's confidentiality agreement).
 
@@ -34,8 +39,17 @@ source("code/do_map.R")
 ```
 
 ## Visualization
-### Temporal Variation of Flow by Day of Week and Trip Purpose 
-We first visualize the temporal variation of flow by day of week and trip purpose. We expect the 
+### Temporal Variation of Trips by Day of Week and Trip Purpose 
+
+We first visualize the variation of trip frequencies by time-of-day, day of week, and trip purpose. We expect trips to vary by all the three dimensions, likely more so for time-of-day and trip purpose than day of week. 
+
+Figure 1 displays trip frequencies for nine trip purposes by time-of-day and day of the week. We apply Loess smooth to draw these line charts, in which the solid lines are the mean trip frequencies over the same day of week in April 2014 and the shades represents the 95% confidence interval. 
+
+Trip frequencies for the OO (Other to Other) purpose are substantially higher than those for other purposes. It makes sense because the AirSage data only distinguishes home and workplace, and lumps all other locations into others. Even thought the height of the peaks are similar throughout different days of a week, it appears at a  different hour of the day and the shape varies from day-to-day: it has a similar shape from Monday to Thursday, but a different one on Sunday, Friday, and Saturday.
+
+Another noticeable pattern in Figure 1 is that, compared with weekdays (Monday-Friday), there is no morning peak of HW trips on weekends (Saturday, Sunday), which makes sense as most workers get these days off and don't have to make HW trips.
+
+As shown in Figure 1, the variance (shades) of OO trip frequencies is the largest, followed by HW, HH, HO and WH trips. The variance of OH, WO and OW trip frequencies is small. The variance of work-related (WO, WH, WW, OW, HW) trip frequencies on weekdays is larger than those on the weekends. The difference in variance between weekday and weekend seems to make sense that much fewer HW trips are made during the weekends than during weekdays. 
 
 ```{r purpose, echo=F}
 trips.date_hour_purpose <- trips.df %>% 
@@ -54,23 +68,31 @@ trips.date_hour_purpose <- trips.df %>%
 ggplot(data=trips.date_hour_purpose, aes(x=Start_Hour, y=trips, colour=Purpose, group=Purpose)) +
   #geom_area(position = 'stack') +
   stat_smooth() + ylim(0, 500000) +
-  facet_wrap(~Start_Day)
+  facet_wrap(~Start_Day) +
+  ggtitle("Temporal Variation of Trips by Day of Week and Trip Purpose")
   #scale_y_continuous(labels = percent) +
   #labs(x="standard dev of residuals", y="Normalized mean error") +
   #scale_colour_discrete(guide=FALSE) +
   #scale_y_log10()
 ```
 
+To make it easier to see the difference between weekdays and weekends, we create Figure 2 that displays trip frequencies for the nine trip purposes over time-of-day on weekdays and weekends. Besides a wider peak on weekday, there is little difference in trip frequencies for OO purpose between weekday and weekend (even though there is higher variance on weekend). For work related trips, trip frequencies on weekend is much lower than that on weekday. This makes sense that few people go to work places during weekend. The distribution of HH trips are quite different on weekday and weekend: there are two peaks of trip frequencies for HH purpose on weekday, while there is only one sharp peak on weekend. For OH trips, there are higher trip frequencies during 12 to 17 hour (12-5pm) on weekend than on weekday. This makes sense that people are more likely to go back home during this period on weekend than on weekday. 
+
+```{r}
 ggplot(data=trips.date_hour_purpose, aes(x=Start_Hour, y=trips, colour=Purpose, group=Purpose)) +
   #geom_area(position = 'stack') +
   stat_smooth() + ylim(0, 500000) +
-  facet_wrap(~Start_Weekend)
+  facet_wrap(~Start_Weekend) + 
+  ggtitle("Temporal Variation of Trips by Weekday/Weekend and Trip Purpose")
+```
 
+Finally, we would like examine how the patterns vary by hours and day. Figure 3 displays trip frequencies for the nine trip purposes by time-of-day (X-axis) and date of April 2014 (Y-axis). Each rectangle in Figure 3 represents scaled trip frequencies (z-score) for a certain purpose during one hour period of certain day. Figure 3 further shows that there is no obvious difference in trip frequencies for WW, OO and OH purposes between weekday and weekend. The most obvious difference in trip frequencies between weekday and weekend are OW, WO, WH and HW trips. Figure 3 also shows that HW and WH trips on weekend are made later than those made on weekdays. This indicates that people go to work later on weekend than on weekday and they also leave later on weekend than weekday. They spend same time period on working during weekend as during weekday. This implies that workers have more flexible schedule on weekends. There is also difference in trip frequencies for HH and HO between weekday and weekend, but they are not as obvious as WW, OO and OH trips. Figure 3 shows there is almost no difference between two days if they are both weekday or weekend no matter what dates they are. This implies that there is little variation across date of month in April 2014. One exception is April 18th, which is a Friday but its trip frequencies for HO is more similar to weekend, because April 20th is the Easter and April 18th is Good Friday. 
+
+```{r}
 trips.date_hour_purpose %<>% 
   group_by(Start_Date, Purpose) %>% 
   mutate(trips_scaled=scale(trips))
 
-base_size <- 9
 (p <- ggplot(trips.date_hour_purpose, aes(Start_Hour, Start_Date)) + geom_tile(aes(fill = trips_scaled),
      colour = "white") + scale_fill_gradient(low = "white", high = "red") + 
      # theme_grey(base_size = base_size) + labs(x = "", y = "") + 
@@ -78,19 +100,13 @@ base_size <- 9
      # theme(legend.position = "none", axis.ticks = element_blank(), 
      #      axis.text.x = element_text(size = base_size * 0.8, angle = 330, 
      #                               hjust = 0, colour = "grey50"))    +
-    facet_wrap(~Purpose)
+    facet_wrap(~Purpose) +
+    ggtitle("Temporal Variation of Trips by Date and Hour and Trip Purpose")
     )
 ```
 
-### Subscriber Class
-Figure 1 displays trip frequencies for nine trip purposes by time-of-day and day of the week. Trip frequency for O-O (OO) purpose is substantially higher than trip frequencies for other trip purposes. It makes sense because other locations include locations except home and work place. The second largest number of trips are made for (Home to Home) HH. The trip frequencies for Home to Work (HW), (Home to Other) HO and (Other to Home) OH are a little less than trip frequency for HH. The lowest number of trips is made for Work to Work (WW) purpose. The trip frequency for Work to Other (WO) is higher than that for WW, and less than trip frequency for Work to Home (WH). 
-
-The distribution of trip frequency for OO purpose are similar on days of the week: trip frequency appears around noon and peak of trip frequency is about 45, 000.  All work related trips (WO, WH, WW, OW and HW) show clear temporal patterns: trip frequencies on weekend are much less than on weekday; peak of trips that originating at home (HW) appears in the morning; peak of trips that ending at home (WH) appears at the afternoon. The peak of HH appears around noon on weekend, and appears before and after noon. The peak of WH is much lower than that of HW, because people are nor all going back home after work, which is shown in figure: peak of WO appears around 17:30 PM on weekdays. 
-The shadow around the solid line shows the variance of trip frequency. As shown in Figure 1, the variance of OO trip frequency is the highest, followed by HW, HH, HO and WH trips. Variance of OH, WO and OW trip frequency are not obvious. The variances of work-related (WO, WH, WW, OW, HW) trip frequency on weekdays is larger than those on weekend. The difference in variance between weekday and weekend seems to make sense that much less HW trips are made during weekend than during weekday. 
-
-Figure 2 displays trip frequency for nine trip purposes over time-of-day on weekday and weekend. There is least difference in trip frequency for OO purpose between weekday and weekend. For work related trips, trip frequency on weekend is much less than that on weekday. This makes sense that few people go to work places during weekend. The distribution of HH trips are quite different on weekday and weekend: there are two peaks of trip frequency for HH purpose on weekday, while there is only one sharp peak on weekend. For OH trips, there are higher trip frequency during 0:00 pm to 5:00 pm on weekend than on weekday. This makes sense that people are more likely to go back home during 0:00 pm to 5:00 pm on weekend than on weekday. 
-
-Figure 3 displays trip frequency for nine trip purposes by time-of-day and date of April 2014. Each rectangle in Figure 3 represents scaled trip frequency for certain purpose during one hour period of certain day. Figure 3 further shows that there are no obvious difference in trip frequency for WW, OO and OH purposes between weekday and weekend. Most obvious difference in trip frequency between weekday and weekend are OW, WO, WH and HW trips. Just as Figure 3 shows, HW and WH trips on weekend are made later than those made on weekdays. This indicates that people go to work later on weekend than on weekday and they also leave later on weekend than weekday. They spend same time period on working during weekend as during weekday. This implies that employees are glad to spend same time on work and have more flexible schedule. There are also differences in trip frequency for HH and HO between weekday and weekend, but they are not obvious as WW, OO and OH trips. Figure 3 shows there is almost no difference between two days if they are both weekday or weekend no matter what dates they are. This implies that date of month does not influence travel behavior. One exception is April 18th, which is Friday but its trip frequency for HO is similar to weekend, because April 20th is the Easter and April 18th is Good Friday. 
+### Temporal Variation of Trips by Day of Week and Subscriber Class
+We repeat the above visualization for subscriber class. Comparing the difference in travel patternamong subscriber classes, we found that short term visitors made the most trips, followed by long term visitors, resident workers and home workers, whereas there were relatively less trips made by inbound and outbound commuters. In terms of time of day, the trip count is an apparent inverse U curve indicating more trips were made in daytime, with PM peak trend for resident workers. All subscriber classes seemed to have later starts in the mornings and earlier ends in the evenings in weekends than weekdays. Resident workers made relatively more trips in late afternoon , possibly after-work errands, in the weekdays than weekends.
 
 ```{r}
 trips.date_hour_class <- trips.df %>% 
@@ -112,7 +128,11 @@ ggplot(data=trips.date_hour_class, aes(x=Start_Hour, y=trips, colour=Subscriber_
   #labs(x="standard dev of residuals", y="Normalized mean error") +
   #scale_colour_discrete(guide=FALSE) +
   #scale_y_log10()
+```
 
+To better examine the difference between weekdays and weekends, we compare the travel patterns between weekdays and weekends among different subscriber classes. It was clear that almost all subscriber class, except long term visitors made more trips in weekdays than in weekends. The resident workers' travel patterns of more late afternoon trips in weekdays are more apparent in the figure below. In addition, the variance of trip frequecies is bigger in weekends than weekdays, indicating trips frequecies may be less predictable on weekends than on weekdays.
+
+```{r}
 ggplot(data=trips.date_hour_class, aes(x=Start_Hour, y=trips, colour=Subscriber_Class, group=Subscriber_Class)) +
   #geom_area(position = 'stack') +
   stat_smooth() + ylim(0, 500000) +
@@ -121,25 +141,20 @@ ggplot(data=trips.date_hour_class, aes(x=Start_Hour, y=trips, colour=Subscriber_
 trips.date_hour_class %<>% 
   group_by(Start_Date, Subscriber_Class) %>% 
   mutate(trips_scaled=scale(trips))
-```
 
-Comparing the travel pattern differences among subscriber classes, we found that short term visitors made the most trips, followed by long term visitors, resident workers and home workers, whereas there were relatively less trips made by inbound and outbound commuters. In terms of time of day, the trip count was an apparent inverse U curve indicating more trips were made in daytime, with PM peak trend for resident workers. All subscriber classes seemed to have late starts in the mornings and early ends in the evenings in weekends than weekdays. Resident workers made relatively more trips in late afternoon time, possibly after-work errand trips, in the weekdays than weekends.
-
-As there were significant differences between weekdays and weekends, we closely compare the travel pattern differences between weekdays and weekends among different subscriber classes. It was clear that almost all subscriber class, except long term visitors made more trips in weekdays than in weekends. The resident workers' travel patterns of more late afternoon trips in weekdays was more apparent in the weekend/weekday comparison graph. In addition, the variation of trip generation, represented by the grey shady areas around the lines, were bigger in weekends than weekdays, indicating trips generation in weekends were less predictable than weekdays.
-
-
-```{r}
 (p <- ggplot(trips.date_hour_class, aes(Start_Hour, Start_Date)) + geom_tile(aes(fill = trips_scaled),
      colour = "white") + scale_fill_gradient(low = "white", high = "red") + 
     facet_wrap(~Subscriber_Class)
     )
 ```
 
-Next we visualize the spatial patterns of trip counts in the AirSage data. We are interested in the hour by hour net trips at the TAZ level (for each TAZ, net trips = trips destinated - trips originated).  
+## Spatial Variation of Trips by Hour (Average Day)
+Next we visualize and examine the spatial flow patterns in the AirSage data. We are interested in the hour by hour net trips at the TAZ level (for each TAZ, net trips = trips destinated - trips originated) for an average weekday. It is clear that net trips come from fringe of the Orlando area in the morning, concentrates in a few hotspot TAZs during middle day, and then dissipates in the evening/night.
+
 ```{r maps, include=F}
 # first compute culumative trips
-do_animation(trips.df, "Weekday")
-do_animation(trips.df, "Weekend")
+#do_animation(trips.df, "Weekday")
+#do_animation(trips.df, "Weekend")
 
 # alternatively, create static maps every 4 hours
 # map.wdh04 <- do_map(cumtrips, Weekend="Weekday", Hour=4)
@@ -159,12 +174,16 @@ do_animation(trips.df, "Weekend")
 # grid.arrange(map.weh04, map.weh08, map.weh12, map.weh16, map.weh20, map.weh24, ncol=2)
 ```
 
-![Net Average Weekday Daily Trips by Hour ]("/docs/map_animation.Weekday.gif")
-![Net Average Weekend Daily Trips by Hour ]("/docs/map_animation.Weekend.gif")
+### Animation of Average Net Trips on Weekdays
+![](map_animation.Weekday.gif)
+
+### Animation of Average Net Trips on Weekends
+![](map_animation.Weekend.gif)
+
+## Conclusion
+In this project, we utilize visualization to examine the temporal and spatial patterns of trips and flow in the AirSage data. Our exploration reveals clear temporal and spatial patterns of trips and flow and demonstrates some of the appealing features of AirSage data source.
 
 ## References
-<! -- Gandrud, C., 2015. Reproducible Research with R and R Studio, Second Edition, 2 edition. ed. Chapman and Hall/CRC, Boca Raton. -->
-
 
 <!--## Session Info-->
 ```{r session_info}
