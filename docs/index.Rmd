@@ -1,20 +1,17 @@
 ---
 title: "Visualize Temporal and Spatial Patterns of AirSage Trips Data"
 author: "Huajie Yang, Wei Shi, Yi Wang, and Liming Wang (Faculty Advisor)"
-date: "12/15/2016"
+date: "12/16/2016"
 output: html_document
 bibliography: "references.bib"
 ---
 
-## Abstract
-
 ## Introduction
-1. Intro of AirSage Data
+AirSage collects anonymous wireless signaling data and processes them into aggregated information of the location, movement and flow of people. For transportation research, AirSage data can be processed as OD flows at the common Traffic Analysis Zone (TAZ) level. Besides its nationwide coverage, the data is at high temporal resolution over a long-time span, a rarity for other transportation data sources.
 
-2. Describe what we have done
+For this project, we are taking advantage of the data's high temporal resolution and long-time span to visualize and explore the temporal and spatial patterns of trip flow. We visualize various aspects of the data, in particular, the temporal variations of travel flow and the difference in patterns across trip purpose and subscriber class. We also visualize the temporal-spatial pattern of travel flow via annimations of net trips at the TAZ level.
 
-This paper is available on [github](https://cities-lab.github.io/TRB2017DataContest/). We follow the practice of reproducible research [@Gandrud2015] for our work and our writing-up is fully reproducible from a Rmarkdown file and R scripts, the source code of which is available on our github repository at https://github.com/cities-lab/TRB2017DataContest (the data files are withheld according to AirSage's confidentiality agreement).
-
+This paper is available on [github](https://cities-lab.github.io/TRB2017DataContest/). We follow the practice of reproducible research [@Gandrud2015] for our work and this write-up is fully reproducible from a Rmarkdown file and R scripts, the source code of which is available on a github repository at https://github.com/cities-lab/TRB2017DataContest (the data files are withheld according to AirSage's confidentiality agreement).
 
 ```{r setup, include=FALSE}
 if (!require("pacman")) {install.packages("pacman"); library(pacman)}
@@ -37,8 +34,10 @@ source("code/do_map.R")
 ```
 
 ## Visualization
-### Trip Purpose
-```{r}
+### Temporal Variation of Flow by Day of Week and Trip Purpose 
+We first visualize the temporal variation of flow by day of week and trip purpose. We expect the 
+
+```{r purpose, echo=F}
 trips.date_hour_purpose <- trips.df %>% 
   #filter(Start_Weekday) %>% 
   group_by(Start_Date, Start_Hour, Purpose) %>% 
@@ -60,6 +59,7 @@ ggplot(data=trips.date_hour_purpose, aes(x=Start_Hour, y=trips, colour=Purpose, 
   #labs(x="standard dev of residuals", y="Normalized mean error") +
   #scale_colour_discrete(guide=FALSE) +
   #scale_y_log10()
+```
 
 ggplot(data=trips.date_hour_purpose, aes(x=Start_Hour, y=trips, colour=Purpose, group=Purpose)) +
   #geom_area(position = 'stack') +
@@ -125,7 +125,8 @@ As there were significant differences between weekdays and weekends, we closely 
     facet_wrap(~Subscriber_Class)
     )
 ```
-Net
+
+Next we visualize the spatial patterns of trip counts in the AirSage data. We are interested in the hour by hour net trips at the TAZ level (for each TAZ, net trips = trips destinated - trips originated).  
 ```{r maps, include=F}
 # first compute culumative trips
 do_animation(trips.df, "Weekday")
