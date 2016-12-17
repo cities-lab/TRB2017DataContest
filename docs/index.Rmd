@@ -1,9 +1,9 @@
 ---
-title: "Visualization and Modeling of AirSage Trips Data"
+title: "Visualize Temporal and Spatial Patterns of AirSage Trips Data"
 author: "Huajie Yang, Wei Shi, Yi Wang, and Liming Wang (Faculty Advisor)"
 date: "12/15/2016"
 output: html_document
-bibliography: references.bib
+bibliography: "references.bib"
 ---
 
 ## Abstract
@@ -13,7 +13,7 @@ bibliography: references.bib
 
 2. Describe what we have done
 
-This paper is available on [github](https://cities-lab.github.io/TRB2017DataContest/). We follow the practice of reproducible research [@Gandrud2015] for our work and our writing-up is fully reproducible from a Rmarkdown file and R scripts, the source of which is available on our github repository at https://github.com/cities-lab/TRB2017DataContest (the data files are withheld according to AirSage's confidentiality agreement).
+This paper is available on [github](https://cities-lab.github.io/TRB2017DataContest/). We follow the practice of reproducible research [@Gandrud2015] for our work and our writing-up is fully reproducible from a Rmarkdown file and R scripts, the source code of which is available on our github repository at https://github.com/cities-lab/TRB2017DataContest (the data files are withheld according to AirSage's confidentiality agreement).
 
 
 ```{r setup, include=FALSE}
@@ -29,10 +29,11 @@ options(scipen=100)
 options(digits=3)
 ```
 
-```{r source, include=F}
+```{r source, include=F, cache=TRUE}
 source("code/functions.R")
 source("code/load_data.R")
 source("code/agg_sld.R")
+source("code/do_map.R")
 ```
 
 ## Visualization
@@ -119,88 +120,32 @@ trips.date_hour_class %<>%
     facet_wrap(~Subscriber_Class)
     )
 ```
-
-```{r animation}
+Net
+```{r maps, include=F}
 # first compute culumative trips
-trips.d1 <- trips.df %>% 
-  filter(Start_Date=="2014-04-01")
+do_animation(trips.df, "Weekday")
+do_animation(trips.df, "Weekend")
 
-cumtrips.out <- trips.d1 %>%   
-  group_by(Origin_Zone, Start_Hour) %>% 
-  summarize(trips=sum(Count)) %>% 
-  mutate(cumtrips.out=cumsum(trips)) %>% 
-  select(Origin_Zone, Start_Hour, cumtrips.out)
-
-cumtrips.in <- trips.d1 %>%   
-  group_by(Destination_Zone, Start_Hour) %>% 
-  summarize(trips=sum(Count)) %>% 
-  mutate(cumtrips.in=cumsum(trips)) %>% 
-  select(Destination_Zone, Start_Hour, cumtrips.in)
-  
-cumtrips <- cumtrips.in %>% 
-  left_join(cumtrips.out, 
-            by=c("Destination_Zone"="Origin_Zone", "Start_Hour"="Start_Hour")) %>% 
-  mutate(cumtrips=cumtrips.in - cumtrips.out,
-         cumtrips=ifelse(cumtrips<0, 0, cumtrips),
-         id=as.character(Destination_Zone))
-
-spdf.cumtrips <- spdf.ff %>% 
-  left_join(cumtrips, by=c("id"="id"))
-
-map <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=cumtrips),
-                               data = spdf.cumtrips, color ="black", 
-                               size = 0) +
-  coord_map()+
-  scale_fill_distiller(name="trips arrived", palette = "RdBu", breaks = pretty_breaks(n = 5))+
-  theme_nothing(legend = TRUE)
-map
-
-require(gganimate)
-theme_set(theme_bw())
-p <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=cumtrips, frame=Start_Hour),
-                               data = spdf.cumtrips, color ="black", 
-                               size = 0) +
-    coord_map()+
-    scale_fill_distiller(name="trips arrived", palette = "RdBu", breaks = pretty_breaks(n = 5))
-gg_animate(p)
+# alternatively, create static maps every 4 hours
+# map.wdh04 <- do_map(cumtrips, Weekend="Weekday", Hour=4)
+# map.wdh08 <- do_map(cumtrips, Weekend="Weekday", Hour=8)
+# map.wdh12 <- do_map(cumtrips, Weekend="Weekday", Hour=12)
+# map.wdh16 <- do_map(cumtrips, Weekend="Weekday", Hour=16)
+# map.wdh20 <- do_map(cumtrips, Weekend="Weekday", Hour=20)
+# map.wdh24 <- do_map(cumtrips, Weekend="Weekday", Hour=24)
+# grid.arrange(map.wdh04, map.wdh08, map.wdh12, map.wdh16, map.wdh20, map.wdh24, ncol=2)
+# 
+# map.weh04 <- do_map(cumtrips, Weekend="Weekend", Hour=4)
+# map.weh08 <- do_map(cumtrips, Weekend="Weekend", Hour=8)
+# map.weh12 <- do_map(cumtrips, Weekend="Weekend", Hour=12)
+# map.weh16 <- do_map(cumtrips, Weekend="Weekend", Hour=16)
+# map.weh20 <- do_map(cumtrips, Weekend="Weekend", Hour=20)
+# map.weh24 <- do_map(cumtrips, Weekend="Weekend", Hour=24)
+# grid.arrange(map.weh04, map.weh08, map.weh12, map.weh16, map.weh20, map.weh24, ncol=2)
 ```
 
-```{r ggmaps}
-
-
-shpfile <- 'data/taz/OUATS_AirSage_TAZ.shp'
-spdf <- read.shpfile(shpfile)
-
-spdf.ff <- fortify(spdf, region="TAZ_ID")
-spdf.ff %<>% left_join(m0401.o, by=c("id"="TAZ_ID"))
-
-map <- ggplot() + geom_polygon(aes(x = long, y = lat, group=group, fill=trips),
-                               data = spdf.ff, color ="black", 
-                               size = 0) +
-  coord_map()+
-  scale_fill_distiller(name="trips originated", palette = "RdBu", breaks = pretty_breaks(n = 5))+
-  theme_nothing(legend = TRUE)
-map
-```
-
-
-```{r leaflet_maps}
-spdf@data %<>% left_join(m0401.o %>% mutate(TAZ_ID=as.integer(TAZ_ID)))
-pal.qtl <- colorQuantile(palette = "YlOrRd", domain = spdf@data$trips)
-pal.num <- colorNumeric (palette = "YlOrRd", domain = spdf@data$trips)
-leaflet(spdf) %>%
-  addPolygons(
-    stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5,
-    fillColor = ~pal.qtl(trips),
-    label=~stringr::str_c(
-                TAZ_ID,' ',
-                formatC(trips, big.mark = ',', format='d')),
-    labelOptions= labelOptions(direction = 'auto'),
-    highlightOptions = highlightOptions(
-                color='#ff0000', opacity = 1, weight = 2, fillOpacity = 1,
-                bringToFront = TRUE, sendToBack = TRUE)
-  )
-```
+![Net Average Weekday Daily Trips by Hour ]("/docs/map_animation.Weekday.gif")
+![Net Average Weekend Daily Trips by Hour ]("/docs/map_animation.Weekend.gif")
 
 ## References
 <! -- Gandrud, C., 2015. Reproducible Research with R and R Studio, Second Edition, 2 edition. ed. Chapman and Hall/CRC, Boca Raton. -->
